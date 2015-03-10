@@ -1,25 +1,3 @@
-/*The MIT License (MIT)
-
-Copyright (c) 2014 https://github.com/kayalshri/
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.*/
-
 (function($){
         $.fn.extend({
             tableExport: function(options) {
@@ -32,7 +10,7 @@ THE SOFTWARE.*/
 						pdfLeftMargin:20,
 						escape:'true',
 						htmlContent:'false',
-						consoleLog:'false'
+						consoleLog:'true'
 				};
                 
 				var options = $.extend(defaults, options);
@@ -218,14 +196,22 @@ THE SOFTWARE.*/
 					$(el).find('thead').find('tr').each(function() {
 						excel += "<tr>";
 						$(this).filter(':visible').find('th').each(function(index,data) {
-							if ($(this).css('display') != 'none'){					
+							if ($(this).css('display') != 'none'){	
+								var color =  $(this).css('background-color');
 								if(defaults.ignoreColumn.indexOf(index) == -1){
-									excel += "<td>" + parseString($(this))+ "</td>";
+									excel += parseItemData($(this),'th',color);
+								}
+							}
+						});	
+						$(this).filter(':visible').find('td').each(function(index,data) {
+							if ($(this).css('display') != 'none'){				
+								var color =  $(this).css('background-color');
+								if(defaults.ignoreColumn.indexOf(index) == -1){
+									excel += parseItemData($(this),'td',color);
 								}
 							}
 						});	
 						excel += '</tr>';						
-						
 					});					
 					
 					
@@ -236,12 +222,24 @@ THE SOFTWARE.*/
 						var colCount=0;
 						$(this).filter(':visible').find('td').each(function(index,data) {
 							if ($(this).css('display') != 'none'){	
+								//Gets css attributes
+								var color =  $(this).css('background-color');
 								if(defaults.ignoreColumn.indexOf(index) == -1){
-									excel += "<td>"+parseString($(this))+"</td>";
+									excel += parseItemData($(this),'td',color);
 								}
 							}
 							colCount++;
-						});															
+						});	
+						$(this).filter(':visible').find('th').each(function(index,data) {
+							if ($(this).css('display') != 'none'){	
+								var color =  $(this).css('background-color');
+								if(defaults.ignoreColumn.indexOf(index) == -1){
+									excel += parseItemData($(this),'th',color);
+								}
+							}
+							colCount++;
+						});	
+							
 						rowCount++;
 						excel += '</tr>';
 					});					
@@ -274,7 +272,7 @@ THE SOFTWARE.*/
 					excelFile += excel;
 					excelFile += "</body>";
 					excelFile += "</html>";
-
+					
 					var base64data = "base64," + $.base64.encode(excelFile);
 					window.open('data:application/vnd.ms-'+defaults.type+';filename=exportData.doc;' + base64data);
 					
@@ -352,7 +350,36 @@ THE SOFTWARE.*/
 					
 					return content_data;
 				}
-			
+				
+				// Analize row attributes and compose new <td> with them
+				function parseItemData(item, type,color){
+					var spanAtt = false;
+					var fila = item[0];
+					var excelTd="";
+					if(color == 'transparent'){
+						color = 'rgb(255,255,255)';
+					}
+					//Check for attributes
+					for(var i=0; i<= fila.attributes.length -1 ; i++){
+						if(fila.attributes[i].name == "colspan" || fila.attributes[i].name == "rowspan"){
+							excelTd += '<' + type + ' '+fila.attributes[i].name + ' = ' + fila.attributes[i].nodeValue + ' bgcolor = "'+ rgb2hex(color) +'">' + parseString($(item))+ '</' + type + '>';
+							spanAtt = true;
+							break;
+						}
+					}
+					if(!spanAtt){
+						excelTd += '<' + type + ' bgcolor = "' + rgb2hex(color) + '" >' + parseString($(item)) + '</' + type + '>';
+					}	
+					return excelTd;
+				}
+				
+				function rgb2hex(rgb){
+					 rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
+					 return (rgb && rgb.length === 4) ? "#" +
+					  ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
+					  ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
+					  ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
+					}
 			}
         });
     })(jQuery);
