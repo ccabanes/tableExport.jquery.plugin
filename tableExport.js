@@ -195,19 +195,11 @@
 					// Header
 					$(el).find('thead').find('tr').each(function() {
 						excel += "<tr>";
-						$(this).filter(':visible').find('th').each(function(index,data) {
+						$(this).filter(':visible').find('th, td').each(function(index,data) {
 							if ($(this).css('display') != 'none'){	
 								var color =  $(this).css('background-color');
 								if(defaults.ignoreColumn.indexOf(index) == -1){
 									excel += parseItemData($(this),'th',color);
-								}
-							}
-						});	
-						$(this).filter(':visible').find('td').each(function(index,data) {
-							if ($(this).css('display') != 'none'){				
-								var color =  $(this).css('background-color');
-								if(defaults.ignoreColumn.indexOf(index) == -1){
-									excel += parseItemData($(this),'td',color);
 								}
 							}
 						});	
@@ -220,7 +212,7 @@
 					$(el).find('tbody').find('tr').each(function() {
 						excel += "<tr>";
 						var colCount=0;
-						$(this).filter(':visible').find('td').each(function(index,data) {
+						$(this).filter(':visible').find('td, th').each(function(index,data) {
 							if ($(this).css('display') != 'none'){	
 								//Gets css attributes
 								var color =  $(this).css('background-color');
@@ -230,15 +222,7 @@
 							}
 							colCount++;
 						});	
-						$(this).filter(':visible').find('th').each(function(index,data) {
-							if ($(this).css('display') != 'none'){	
-								var color =  $(this).css('background-color');
-								if(defaults.ignoreColumn.indexOf(index) == -1){
-									excel += parseItemData($(this),'th',color);
-								}
-							}
-							colCount++;
-						});	
+
 							
 						rowCount++;
 						excel += '</tr>';
