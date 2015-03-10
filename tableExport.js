@@ -273,8 +273,11 @@
 					excelFile += "</body>";
 					excelFile += "</html>";
 					
+					//Export function
 					var base64data = "base64," + $.base64.encode(excelFile);
-					window.open('data:application/vnd.ms-'+defaults.type+';filename=exportData.doc;' + base64data);
+					var extension = 'xls';					
+					openDownloadLink("Export" + '.' + extension, 'data:application/vnd.ms-'+defaults.type+';charset=utf-8;filename='+defaults.filename+'.'+extension+';' + base64data);
+					
 					
 				}else if(defaults.type == 'png'){
 					html2canvas($(el), {
@@ -379,6 +382,16 @@
 					  ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
 					  ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
 					  ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
+					}
+				
+				function openDownloadLink(filename, href) {
+					var a = document.createElement('a');
+					document.body.appendChild(a);
+					a.style = 'display: none';
+					a.href = href;
+					a.download = filename;
+					a.click();
+					document.body.removeChild(a);
 					}
 			}
         });
